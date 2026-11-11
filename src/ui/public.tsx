@@ -361,6 +361,7 @@ function qs(base: string, f: PublicFilters, patch: Partial<Record<string, string
 }
 
 /* ───────────── Kosovo map: municipality shapes (server-rendered SVG) ───────────── */
+const MAIN_TOWNS = ["prishtine", "prizren", "peje", "gjakove", "mitrovice_veriut", "ferizaj", "gjilan"];
 function KosovoMap({ lang, counts, filters }: { lang: Lang; counts: Record<string, number>; filters: PublicFilters }) {
   const t = DASH[lang];
   const base = hatemapPath(lang);
@@ -409,13 +410,14 @@ function KosovoMap({ lang, counts, filters }: { lang: Lang; counts: Record<strin
         })}
         {/* Labels for main towns and every municipality with records */}
         {keys
-          .filter((k) => (counts[k] ?? 0) > 0 || ["prishtine", "prizren", "peje", "gjakove", "mitrovice_veriut", "ferizaj", "gjilan"].includes(k))
+          // Main towns, every municipality with records, and the selected one (so its name is always visible)
+          .filter((k) => (counts[k] ?? 0) > 0 || filters.municipality === k || MAIN_TOWNS.includes(k))
           .map((k) => {
             const n = counts[k] ?? 0;
             const r = n ? 13 + 15 * Math.sqrt(n / max) : 0;
             const { cx, cy } = muni[k];
             return (
-              <text key={`l-${k}`} x={cx} y={cy - r - 8} textAnchor="middle" className="hm-label">
+              <text key={`l-${k}`} x={cx} y={cy - r - 8} textAnchor="middle" className={`hm-label${filters.municipality === k ? " is-selected" : ""}`}>
                 {municipalityName(k, lang)}
               </text>
             );
@@ -719,7 +721,7 @@ export async function HatemapIndex({ lang, filters }: { lang: Lang; filters: Pub
       <Container className="pb-14 xl:!max-w-[1360px]">
         <p className="rounded-2xl border border-line bg-paper-2 p-4 text-sm text-muted">{t.limits}</p>
       </Container>
-      <script data-keep src="/vendor/hatemap.js?v=9" defer />
+      <script data-keep src="/vendor/hatemap.js?v=10" defer />
     </div>
   );
 }
@@ -780,8 +782,9 @@ function PickerMap({ lang }: { lang: Lang }) {
           <title>{municipalityName(k, lang)}</title>
         </path>
       ))}
-      {["prishtine", "prizren", "peje", "gjakove", "mitrovice_veriut", "ferizaj", "gjilan"].map((k) => (
-        <text key={`l-${k}`} x={muni[k].cx} y={muni[k].cy + 4} textAnchor="middle" className="hm-label">
+      {/* Main towns always; any other name appears when that municipality is picked (hatemap.js) */}
+      {Object.keys(muni).map((k) => (
+        <text key={`l-${k}`} x={muni[k].cx} y={muni[k].cy + 4} textAnchor="middle" className={MAIN_TOWNS.includes(k) ? "hm-label" : "hm-label hm-pick-label"} data-label={k}>
           {municipalityName(k, lang)}
         </text>
       ))}
@@ -981,7 +984,7 @@ export function HatemapReport({ lang, status }: { lang: Lang; status?: string })
           </p>
         </aside>
       </Container>
-      <script data-keep src="/vendor/hatemap.js?v=9" defer />
+      <script data-keep src="/vendor/hatemap.js?v=10" defer />
     </div>
   );
 }

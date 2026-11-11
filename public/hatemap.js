@@ -34,6 +34,9 @@
       each(picker.querySelectorAll("[data-pick]"), function (p) {
         p.classList.toggle("is-selected", p.getAttribute("data-pick") === key);
       });
+      each(picker.querySelectorAll("[data-label]"), function (l) {
+        l.classList.toggle("is-selected", l.getAttribute("data-label") === key);
+      });
       var opt = select.querySelector('option[value="' + key + '"]');
       if (nameEl) nameEl.textContent = key && key !== "unknown" && opt ? "✓ " + opt.textContent : "";
     }

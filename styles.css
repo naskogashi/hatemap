@@ -60,6 +60,10 @@
   stroke-width: 3px;
   pointer-events: none;
 }
+.hm-label.is-selected { font-weight: 800; fill: var(--ink); }
+/* Report picker: names of smaller municipalities show only when picked */
+.hm-pick-label { display: none; }
+.hm-pick-label.is-selected { display: inline; }
 #hm-stage { background: var(--hm-stage); }
 #hm-stage.is-zoomed { cursor: grab; }
 #hm-stage.is-dragging { cursor: grabbing; }
@@ -185,7 +189,15 @@ input:checked + .hm-tab { background: #f79009; color: #101828; }
 .hm-acc-chev { transition: transform 0.2s; }
 .hm-acc[open] .hm-acc-chev { transform: rotate(45deg); }
 .hm-acc[open] > p { animation: hm-in 0.25s ease; }
-@media (prefers-reduced-motion: reduce) { .hm-step-panel, .hm-tab-panel, .hm-acc[open] > p { animation: none; } .hm-progress > span { transition: none; } }
+/* Correction request: tips for the chosen type, warning when urgent (no JS needed) */
+.hm-tip, .hm-urgent-note { display: none; animation: hm-in 0.3s ease; }
+.hm-req:has(input[name="kind"]:checked) .hm-tip-empty { display: none; }
+.hm-req:has(input[value="correction"]:checked) .hm-tip[data-kind="correction"],
+.hm-req:has(input[value="appeal"]:checked) .hm-tip[data-kind="appeal"],
+.hm-req:has(input[value="removal"]:checked) .hm-tip[data-kind="removal"],
+.hm-req:has(input[name="urgent"]:checked) .hm-urgent-note { display: block; }
+@supports not selector(:has(*)) { .hm-tip, .hm-urgent-note { display: block; } .hm-tip-empty { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hm-step-panel, .hm-tab-panel, .hm-acc[open] > p, .hm-tip, .hm-urgent-note { animation: none; } .hm-progress > span { transition: none; } }
 
 /* ───────────── Admin primitives (Badge, Notice, Tabs, tables) ───────────── */
 .tone {
