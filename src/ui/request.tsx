@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, hatemapPath, routePath, type Lang } from "@hatemap-host";
+import { hatemapPath, routePath, type Lang } from "@hatemap-host";
 import { Container } from "@hatemap-host";
 
 /**
@@ -28,7 +28,7 @@ const T = {
     email: "Email për përgjigje (opsionale)",
     emailHint: "Pa email nuk mund t'ju përgjigjemi. E përdorim vetëm për këtë kërkesë dhe e fshijmë pas mbylljes së saj.",
     send: "Dërgo kërkesën",
-    privacy: "Kërkesa ruhet në sistemin e mbrojtur të HateMap dhe shihet vetëm nga stafi i autorizuar. Mund të kërkoni edhe me email në",
+    privacy: "Kërkesa ruhet në sistemin e mbrojtur të HateMap dhe shihet vetëm nga stafi i autorizuar.",
     thanksTitle: "Kërkesa u pranua",
     thanks: "Faleminderit. Kërkesa juaj do të shqyrtohet nga ekipi ynë. Nëse keni lënë email, do t'ju njoftojmë për vendimin.",
     error: "Kontrolloni fushat: zgjidhni llojin dhe shkruani së paku disa fjali.",
@@ -54,7 +54,7 @@ const T = {
     email: "Email for our reply (optional)",
     emailHint: "Without an email we cannot reply. We use it only for this request and erase it after the request is closed.",
     send: "Send request",
-    privacy: "Your request is stored in the protected HateMap system and seen only by authorised staff. You can also write to",
+    privacy: "Your request is stored in the protected HateMap system and seen only by authorized staff.",
     thanksTitle: "Request received",
     thanks: "Thank you. Our team will review your request. If you left an email, we will tell you the decision.",
     error: "Please check the form: choose a type and write at least a few sentences.",
@@ -80,7 +80,7 @@ const T = {
     email: "Imejl za odgovor (opciono)",
     emailHint: "Bez imejla ne možemo da odgovorimo. Koristimo ga samo za ovaj zahtev i brišemo ga nakon zatvaranja zahteva.",
     send: "Pošalji zahtev",
-    privacy: "Vaš zahtev se čuva u zaštićenom HateMap sistemu i vidi ga samo ovlašćeno osoblje. Možete pisati i na",
+    privacy: "Vaš zahtev se čuva u zaštićenom HateMap sistemu i vidi ga samo ovlašćeno osoblje.",
     thanksTitle: "Zahtev je primljen",
     thanks: "Hvala. Naš tim će pregledati vaš zahtev. Ako ste ostavili imejl, obavestićemo vas o odluci.",
     error: "Proverite formular: izaberite vrstu i napišite bar nekoliko rečenica.",
@@ -180,7 +180,6 @@ export function HatemapRequest({ lang, status, record }: { lang: Lang; status?: 
           <div className="flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
             <p className="max-w-md text-xs leading-relaxed text-muted">
               {t.privacy}{" "}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2 hover:text-accent-ink">{CONTACT_EMAIL}</a>.{" "}
               <a href={routePath("privacy", lang)} className="underline underline-offset-2 hover:text-accent-ink">↗</a>
             </p>
             <button type="submit" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3 font-semibold text-[#101828] transition hover:bg-brand-400">

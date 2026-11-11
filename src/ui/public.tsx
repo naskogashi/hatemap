@@ -719,7 +719,7 @@ export async function HatemapIndex({ lang, filters }: { lang: Lang; filters: Pub
       <Container className="pb-14 xl:!max-w-[1360px]">
         <p className="rounded-2xl border border-line bg-paper-2 p-4 text-sm text-muted">{t.limits}</p>
       </Container>
-      <script data-keep src="/vendor/hatemap.js?v=8" defer />
+      <script data-keep src="/vendor/hatemap.js?v=9" defer />
     </div>
   );
 }
@@ -774,7 +774,7 @@ function RecordCard({ r, lang, compact = false }: { r: HmRecord; lang: Lang; com
 function PickerMap({ lang }: { lang: Lang }) {
   const muni = KOSOVO.municipalities as Record<string, { d: string; cx: number; cy: number }>;
   return (
-    <svg viewBox={KOSOVO.viewBox} role="group" aria-label={HM[lang].municipality} className="h-full w-full" id="hm-picker">
+    <svg viewBox={KOSOVO.viewBox} data-viewbox={KOSOVO.viewBox} role="group" aria-label={HM[lang].municipality} className="h-full w-full select-none" id="hm-picker">
       {Object.keys(muni).map((k) => (
         <path key={k} d={muni[k].d} className="hm-shape hm-pick" data-pick={k}>
           <title>{municipalityName(k, lang)}</title>
@@ -952,10 +952,14 @@ export function HatemapReport({ lang, status }: { lang: Lang; status?: string })
           <section className="rounded-3xl border border-line bg-paper-2 p-5">
             <h2 className="text-lg font-bold text-ink">{t.municipality}</h2>
             <p className="text-sm text-muted">{steps[3]}</p>
-            <div className="relative mt-3 aspect-[620/666] w-full overflow-hidden rounded-2xl" style={{ background: "var(--hm-stage)" }}>
+            <div id="hm-pick-stage" className="relative mt-3 aspect-[620/666] w-full overflow-hidden rounded-2xl" style={{ background: "var(--hm-stage)" }}>
               <div className="absolute inset-0 p-2">
                 <PickerMap lang={lang} />
               </div>
+              {/* Shown by hatemap.js once the map is zoomed to a municipality */}
+              <button type="button" data-hm-pick-home hidden aria-label={DASH[lang].home} title={DASH[lang].home} className="hm-ctl absolute bottom-3 right-3">
+                <Icon name="home" />
+              </button>
             </div>
             <p className="mt-2 text-sm font-semibold text-ink" id="hm-pick-name" aria-live="polite" />
           </section>
@@ -977,7 +981,7 @@ export function HatemapReport({ lang, status }: { lang: Lang; status?: string })
           </p>
         </aside>
       </Container>
-      <script data-keep src="/vendor/hatemap.js?v=8" defer />
+      <script data-keep src="/vendor/hatemap.js?v=9" defer />
     </div>
   );
 }
@@ -1015,55 +1019,301 @@ const METHOD: Record<Lang, { title: string; sections: { h: string; p: string[] }
   },
 };
 
+/* Methodology page: interactive without JavaScript (radio tabs + <details>), same look as the map dashboard. */
+const MX = {
+  sq: {
+    eyebrow: "Si funksionon HateMap",
+    glance: [["0", "raporte të publikuara automatikisht"], ["38", "komuna: vendndodhja më e saktë që shfaqet"], ["1 muaj", "data më e saktë që shfaqet"], ["5", "nivele verifikimi"]],
+    processTitle: "Nga raporti te harta",
+    processSub: "Çdo regjistrim kalon nëpër të njëjtat pesë hapa. Zgjidhni një hap.",
+    step: "Hapi",
+    steps: [
+      ["Raportimi", "Kushdo mund të dërgojë një raport, edhe në mënyrë anonime. Ekipi ynë regjistron raste edhe nga monitorimi i mediave, partnerët dhe hulumtimet."],
+      ["Shqyrtimi", "Një moderator i trajnuar lexon çdo raport, heq të dhënat personale dhe e klasifikon sipas kategorisë, grupit të prekur, burimit dhe komunës."],
+      ["Verifikimi", "Kërkojmë konfirmim të pavarur dhe caktojmë një nga pesë nivelet e verifikimit. Pretendimet nuk paraqiten kurrë si fakte."],
+      ["Publikimi", "Publikimi kërkon vendim të moderatorit dhe arsyetim me shkrim. Regjistrimet tregojnë vetëm komunën dhe muajin; nëse detajet mund ta rrezikojnë dikë, regjistrimi publikohet i redaktuar."],
+      ["Korrigjimi", "Kushdo mund të kërkojë korrigjim, ankim ose heqje. Çdo ndryshim arsyetohet dhe ruhet në një regjistër auditimi që nuk mund të ndryshohet."],
+    ],
+    verifyTitle: "Pesë nivele verifikimi",
+    verifySub: "Çdo regjistrim i publikuar tregon sa të sigurt jemi. Hapni një nivel për të parë çfarë do të thotë.",
+    certainty: "Siguria",
+    protectTitle: "Mbrojtja e njerëzve",
+    protect: [
+      ["pin", "Vetëm komuna", "Asnjëherë adresa apo vendi i saktë."],
+      ["cal", "Vetëm muaji", "Asnjëherë dita e saktë."],
+      ["users", "Pa emra", "Pa emra, foto apo detaje që identifikojnë viktimat ose raportuesit."],
+      ["shield", "Pa etiketa pa prova", "Askush nuk quhet autor pa bazë të mjaftueshme provash dhe ligjore."],
+      ["check", "Kujdes i shtuar", "Rastet me fëmijë, të mbijetuar të dhunës ose persona të cenueshëm kalojnë shqyrtim shtesë."],
+      ["doc", "Kontakti fshihet", "Të dhënat e kontaktit të raportuesit fshihen 6 muaj pas mbylljes së rastit."],
+    ],
+    classifyTitle: "Si klasifikojmë",
+    classifySub: "Çdo regjistrim merr një kategori, një grup të prekur dhe një lloj burimi.",
+    ctaTitle: "Keni parë diçka?",
+    ctaText: "Raportojeni. Ekipi ynë shqyrton çdo raport dhe asgjë nuk publikohet pa verifikim.",
+    mapLink: "Hap hartën",
+  },
+  en: {
+    eyebrow: "How HateMap works",
+    glance: [["0", "reports published automatically"], ["38", "municipalities: the most precise location shown"], ["1 month", "the most precise date shown"], ["5", "verification levels"]],
+    processTitle: "From report to map",
+    processSub: "Every record goes through the same five steps. Select a step.",
+    step: "Step",
+    steps: [
+      ["Report", "Anyone can send a report, anonymously if they wish. Our team also records cases from media monitoring, partners and research."],
+      ["Review", "A trained moderator reads every report, removes personal data and classifies it by category, affected group, source and municipality."],
+      ["Verify", "We look for independent confirmation and assign one of five verification levels. Allegations are never presented as facts."],
+      ["Publish", "Publishing needs a moderator's decision and a written reason. Records show only the municipality and month; if details could put someone at risk, the record is published redacted."],
+      ["Correct", "Anyone can ask for a correction, appeal or removal. Every change is explained and kept in an audit log that cannot be altered."],
+    ],
+    verifyTitle: "Five levels of verification",
+    verifySub: "Each published record shows how certain we are. Open a level to see what it means.",
+    certainty: "Certainty",
+    protectTitle: "Protecting people",
+    protect: [
+      ["pin", "Municipality only", "Never an address or exact place."],
+      ["cal", "Month only", "Never the exact day."],
+      ["users", "No names", "No names, photos or details that identify victims or reporters."],
+      ["shield", "No labels without proof", "No one is named as a perpetrator without an adequate evidentiary and legal basis."],
+      ["check", "Extra care", "Cases involving minors, survivors of violence or vulnerable people get an additional review."],
+      ["doc", "Contact erased", "A reporter's contact details are deleted 6 months after the case is closed."],
+    ],
+    classifyTitle: "How we classify",
+    classifySub: "Every record gets one category, one affected group and one source type.",
+    ctaTitle: "Seen something?",
+    ctaText: "Report it. Our team reviews every report, and nothing is published without verification.",
+    mapLink: "Open the map",
+  },
+  sr: {
+    eyebrow: "Kako HateMap funkcioniše",
+    glance: [["0", "prijava objavljenih automatski"], ["38", "opština: najpreciznija prikazana lokacija"], ["1 mesec", "najprecizniji prikazani datum"], ["5", "nivoa verifikacije"]],
+    processTitle: "Od prijave do mape",
+    processSub: "Svaki zapis prolazi kroz istih pet koraka. Izaberite korak.",
+    step: "Korak",
+    steps: [
+      ["Prijava", "Svako može poslati prijavu, i anonimno. Naš tim beleži slučajeve i iz praćenja medija, od partnera i iz istraživanja."],
+      ["Pregled", "Obučeni moderator čita svaku prijavu, uklanja lične podatke i razvrstava je po kategoriji, pogođenoj grupi, izvoru i opštini."],
+      ["Provera", "Tražimo nezavisnu potvrdu i dodeljujemo jedan od pet nivoa verifikacije. Navodi se nikada ne predstavljaju kao činjenice."],
+      ["Objava", "Za objavu je potrebna odluka moderatora i pisano obrazloženje. Zapisi prikazuju samo opštinu i mesec; ako bi detalji mogli nekoga da ugroze, zapis se objavljuje redigovan."],
+      ["Ispravka", "Svako može zatražiti ispravku, žalbu ili uklanjanje. Svaka promena se obrazlaže i čuva u evidenciji izmena koja se ne može menjati."],
+    ],
+    verifyTitle: "Pet nivoa verifikacije",
+    verifySub: "Svaki objavljeni zapis pokazuje koliko smo sigurni. Otvorite nivo da vidite šta znači.",
+    certainty: "Sigurnost",
+    protectTitle: "Zaštita ljudi",
+    protect: [
+      ["pin", "Samo opština", "Nikada adresa ili tačno mesto."],
+      ["cal", "Samo mesec", "Nikada tačan dan."],
+      ["users", "Bez imena", "Bez imena, fotografija ili detalja koji identifikuju žrtve ili prijavioce."],
+      ["shield", "Bez etiketa bez dokaza", "Niko se ne označava kao počinilac bez odgovarajućeg dokaznog i pravnog osnova."],
+      ["check", "Dodatna pažnja", "Slučajevi sa maloletnicima, preživelima nasilja ili ranjivim osobama prolaze dodatni pregled."],
+      ["doc", "Kontakt se briše", "Kontakt podaci prijavioca brišu se 6 meseci nakon zatvaranja slučaja."],
+    ],
+    classifyTitle: "Kako razvrstavamo",
+    classifySub: "Svaki zapis dobija jednu kategoriju, jednu pogođenu grupu i jednu vrstu izvora.",
+    ctaTitle: "Videli ste nešto?",
+    ctaText: "Prijavite. Naš tim pregleda svaku prijavu i ništa se ne objavljuje bez provere.",
+    mapLink: "Otvori mapu",
+  },
+} as const;
+
+const VERIFY_COLOR: Record<string, string> = { verified: "#12b76a", credible: "#2e90fa", allegation: "#f79009", narrative: "#9e77ed", signal: "#98a2b3" };
+const STEP_ICON = ["shield", "doc", "check", "map", "book"] as const;
+
 export function HatemapMethodology({ lang }: { lang: Lang }) {
   const m = METHOD[lang];
+  const x = MX[lang];
   const t = HM[lang];
-  const list = (title: string, opts: Option[]) => (
-    <section className="mt-10">
-      <h2 className="font-serif text-2xl font-bold text-ink">{title}</h2>
-      <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-        {opts.map((o) => (
-          <div key={o.key} className="rounded-xl border border-line p-4">
-            <dt className="font-semibold text-ink">{o.label[lang]}</dt>
-            {o.hint ? <dd className="mt-1 text-sm text-ink-soft">{o.hint[lang]}</dd> : null}
-          </div>
-        ))}
-      </dl>
-    </section>
-  );
+  const tabs: [string, string, Option[]][] = [
+    ["cat", t.category, CATEGORIES],
+    ["grp", t.group, GROUPS],
+    ["src", t.source, SOURCES],
+  ];
+  const card = "rounded-3xl border border-line bg-paper-2";
   return (
-    <Container className="max-w-4xl py-12">
-      <Eyebrow>HateMap</Eyebrow>
-      <h1 className="font-serif text-4xl font-bold tracking-tight text-ink">{m.title}</h1>
-      {m.sections.map((s) => (
-        <section key={s.h} className="mt-10">
-          <h2 className="font-serif text-2xl font-bold text-ink">{s.h}</h2>
-          {s.p.map((p) => (
-            <p key={p} className="mt-3 text-lg leading-relaxed text-ink-soft">
-              {p}
-            </p>
+    <div className="hm-dash">
+      {/* ── Hero ── */}
+      <Container className="grid gap-8 py-10 lg:grid-cols-12 lg:py-14 xl:!max-w-[1360px]">
+        <div className="lg:col-span-7">
+          <p className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent-ink">
+            <span aria-hidden className="inline-block h-[3px] w-8 bg-brand-500" /> {x.eyebrow}
+          </p>
+          <h1 className="font-sans text-4xl font-extrabold leading-[1.04] tracking-tight text-ink sm:text-5xl xl:text-6xl">{m.title}</h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-soft">{m.sections[0].p[0]}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a href={hatemapPath(lang)} className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-3 font-semibold text-[#101828] shadow-[0_10px_30px_-10px_rgba(247,144,9,0.8)] hover:bg-brand-400">
+              <Icon name="map" /> {x.mapLink}
+            </a>
+            <a href={hatemapPath(lang, "report")} className="inline-flex items-center gap-2 rounded-xl border border-line px-5 py-3 font-semibold text-ink hover:border-brand-400">
+              <Icon name="shield" /> {t.report}
+            </a>
+          </div>
+        </div>
+        <dl className="grid grid-cols-2 gap-px self-end overflow-hidden rounded-2xl border border-line bg-ink/10 lg:col-span-5">
+          {x.glance.map(([v, l]) => (
+            <div key={l} className="bg-paper-2 px-5 py-5">
+              <dd className="text-3xl font-extrabold tracking-tight text-brand-500">{v}</dd>
+              <dt className="mt-1 text-sm text-muted">{l}</dt>
+            </div>
+          ))}
+        </dl>
+      </Container>
+
+      {/* ── Process: radio tabs, CSS shows the chosen step (styles.css .hm-steps) ── */}
+      <Container className="pb-12 xl:!max-w-[1360px]">
+        <section className={`hm-steps ${card} p-5 sm:p-8`} aria-labelledby="hm-process">
+          <h2 id="hm-process" className="text-2xl font-bold text-ink">{x.processTitle}</h2>
+          <p className="mt-1 text-sm text-muted">{x.processSub}</p>
+          <div className="hm-progress mt-6" aria-hidden>
+            <span />
+          </div>
+          <div role="radiogroup" aria-label={x.processTitle} className="mt-4 grid grid-cols-5 gap-2">
+            {x.steps.map(([name], i) => (
+              <span key={name} className="contents">
+                <input type="radio" name="hm-step" id={`hm-step-${i + 1}`} className="sr-only" defaultChecked={i === 0} />
+                <label htmlFor={`hm-step-${i + 1}`} className="hm-step-tab">
+                  <span className="hm-step-num">{i + 1}</span>
+                  <span className="hidden text-sm font-semibold sm:block">{name}</span>
+                </label>
+              </span>
+            ))}
+          </div>
+          {x.steps.map(([name, text], i) => (
+            <div key={name} className="hm-step-panel mt-6 rounded-2xl bg-ink/[0.04] p-5 sm:p-6" data-step={i + 1}>
+              <div className="flex items-start gap-4">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-500/15 text-brand-500">
+                  <Icon name={STEP_ICON[i]} className="h-6 w-6" />
+                </span>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                    {x.step} {i + 1} / 5
+                  </p>
+                  <h3 className="mt-1 text-xl font-bold text-ink">{name}</h3>
+                  <p className="mt-2 max-w-3xl leading-relaxed text-ink-soft">{text}</p>
+                </div>
+              </div>
+            </div>
           ))}
         </section>
-      ))}
-      {list(t.verification, VERIFICATION)}
-      {list(t.category, CATEGORIES)}
-      {list(t.group, GROUPS)}
-      {list(t.source, SOURCES)}
-      <p className="mt-12 flex flex-wrap gap-4">
-        <a href={hatemapPath(lang)} className="font-semibold text-accent-ink hover:underline">
-          ← {t.title}
-        </a>
-        <a href={hatemapPath(lang, "report")} className="font-semibold text-accent-ink hover:underline">
-          {t.report} →
-        </a>
-        <a href={hatemapPath(lang, "request")} className="font-semibold text-accent-ink hover:underline">
-          {HATEMAP_REQUEST_LINK[lang]} →
-        </a>
-        <a href={routePath("contact", lang)} className="font-semibold text-accent-ink hover:underline">
-          {CONTACT_LABEL[lang]} →
-        </a>
-      </p>
-    </Container>
+      </Container>
+
+      {/* ── Verification levels ── */}
+      <Container className="grid gap-6 pb-12 lg:grid-cols-12 xl:!max-w-[1360px]">
+        <div className="lg:col-span-4">
+          <h2 className="text-2xl font-bold text-ink">{x.verifyTitle}</h2>
+          <p className="mt-2 leading-relaxed text-ink-soft">{x.verifySub}</p>
+          <p className="mt-4 text-sm leading-relaxed text-muted">{m.sections[1].p[0]}</p>
+        </div>
+        <div className="grid content-start gap-3 lg:col-span-8">
+          {VERIFICATION.map((v, i) => (
+            <details key={v.key} className={`hm-acc ${card} rounded-2xl`} open={i === 0}>
+              <summary className="flex cursor-pointer list-none items-center gap-4 p-4 sm:p-5">
+                <span className="h-3.5 w-3.5 shrink-0 rounded-full" style={{ background: VERIFY_COLOR[v.key] }} />
+                <span className="flex-1 font-semibold text-ink">{v.label[lang]}</span>
+                <span className="hidden items-center gap-1 sm:flex" title={x.certainty} aria-label={`${x.certainty}: ${5 - i}/5`}>
+                  {[0, 1, 2, 3, 4].map((d) => (
+                    <span key={d} className="h-1.5 w-5 rounded-full" style={{ background: d < 5 - i ? VERIFY_COLOR[v.key] : "color-mix(in srgb, var(--ink) 12%, transparent)" }} />
+                  ))}
+                </span>
+                <span aria-hidden className="hm-acc-chev text-muted">
+                  <Icon name="plus" className="h-4 w-4" />
+                </span>
+              </summary>
+              {v.hint ? <p className="px-4 pb-5 pl-[3.25rem] text-ink-soft sm:px-5 sm:pl-[3.4rem]">{v.hint[lang]}</p> : null}
+            </details>
+          ))}
+        </div>
+      </Container>
+
+      {/* ── Protecting people ── */}
+      <Container className="pb-12 xl:!max-w-[1360px]">
+        <h2 className="text-2xl font-bold text-ink">{x.protectTitle}</h2>
+        <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {x.protect.map(([icon, h, p]) => (
+            <li key={h} className={`${card} flex gap-4 rounded-2xl p-5 transition hover:-translate-y-0.5 hover:border-brand-500/60`}>
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-500/15 text-brand-500">
+                <Icon name={icon as keyof typeof ICONS} />
+              </span>
+              <div>
+                <h3 className="font-semibold text-ink">{h}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-ink-soft">{p}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Container>
+
+      {/* ── Classification: radio tabs ── */}
+      <Container className="pb-12 xl:!max-w-[1360px]">
+        <section className={`hm-tabs ${card} p-5 sm:p-8`} aria-labelledby="hm-classify">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 id="hm-classify" className="text-2xl font-bold text-ink">{x.classifyTitle}</h2>
+              <p className="mt-1 text-sm text-muted">{x.classifySub}</p>
+            </div>
+            <div role="radiogroup" aria-label={x.classifyTitle} className="flex flex-wrap gap-1 rounded-xl bg-ink/5 p-1 text-sm font-semibold">
+              {tabs.map(([id, name], i) => (
+                <span key={id} className="contents">
+                  <input type="radio" name="hm-tab" id={`hm-tab-${id}`} className="sr-only" defaultChecked={i === 0} />
+                  <label htmlFor={`hm-tab-${id}`} className="hm-tab">
+                    {name}
+                  </label>
+                </span>
+              ))}
+            </div>
+          </div>
+          {tabs.map(([id, , opts]) => (
+            <ul key={id} className="hm-tab-panel mt-6 flex-wrap gap-2.5" data-tab={id}>
+              {opts.map((o) => (
+                <li
+                  key={o.key}
+                  title={o.hint?.[lang]}
+                  className={`rounded-xl px-3.5 py-2 text-sm font-semibold transition hover:-translate-y-0.5 ${id === "cat" ? (CATEGORY_TONE[o.key] ?? CATEGORY_TONE.other) : "border border-line text-ink hover:border-brand-500/60"}`}
+                >
+                  {o.label[lang]}
+                </li>
+              ))}
+            </ul>
+          ))}
+        </section>
+      </Container>
+
+      {/* ── Corrections + limitations ── */}
+      <Container className="grid gap-4 pb-12 md:grid-cols-2 xl:!max-w-[1360px]">
+        <section className={`${card} p-6`}>
+          <h2 className="flex items-center gap-2 text-xl font-bold text-ink">
+            <Icon name="check" /> {m.sections[3].h}
+          </h2>
+          <p className="mt-3 leading-relaxed text-ink-soft">{m.sections[3].p[0]}</p>
+          <a href={hatemapPath(lang, "request")} className="mt-4 inline-block font-semibold text-accent-ink hover:underline">
+            {HATEMAP_REQUEST_LINK[lang]} →
+          </a>
+        </section>
+        <section className="rounded-3xl border border-amber-500/40 bg-amber-500/10 p-6">
+          <h2 className="flex items-center gap-2 text-xl font-bold text-ink">
+            <Icon name="book" /> {m.sections[4].h}
+          </h2>
+          <p className="mt-3 leading-relaxed text-ink-soft">{m.sections[4].p[0]}</p>
+        </section>
+      </Container>
+
+      {/* ── Call to action ── */}
+      <Container className="pb-14 xl:!max-w-[1360px]">
+        <div className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-[#101828] p-8 text-white sm:flex-row sm:items-center sm:p-10">
+          <div>
+            <h2 className="text-2xl font-bold">{x.ctaTitle}</h2>
+            <p className="mt-2 max-w-xl text-[#cecfd2]">{x.ctaText}</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <a href={hatemapPath(lang, "report")} className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-3 font-semibold text-[#101828] hover:bg-brand-400">
+              <Icon name="shield" /> {t.report}
+            </a>
+            <a href={routePath("contact", lang)} className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-5 py-3 font-semibold text-white hover:border-brand-400">
+              {CONTACT_LABEL[lang]} →
+            </a>
+          </div>
+        </div>
+      </Container>
+    </div>
   );
 }
 

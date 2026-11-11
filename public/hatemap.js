@@ -37,23 +37,35 @@
       var opt = select.querySelector('option[value="' + key + '"]');
       if (nameEl) nameEl.textContent = key && key !== "unknown" && opt ? "✓ " + opt.textContent : "";
     }
+    var homeBtn = document.querySelector("[data-hm-pick-home]");
+    var view = picker.getAttribute("data-viewbox")
+      ? createView(picker, function (z) { if (homeBtn) homeBtn.hidden = !z; })
+      : null;
+    function frame(key) {
+      if (!view) return;
+      var p = key && key !== "unknown" ? picker.querySelector('[data-pick="' + key + '"]') : null;
+      if (p) view.focusEl(p); else view.home();
+    }
     picker.addEventListener("click", function (e) {
       var p = e.target.closest ? e.target.closest("[data-pick]") : null;
       if (!p) return;
       select.value = p.getAttribute("data-pick");
       mark(select.value);
+      frame(select.value);
     });
-    select.addEventListener("change", function () { mark(select.value); });
+    picker.addEventListener("dblclick", function (e) { e.preventDefault(); });
+    select.addEventListener("change", function () { mark(select.value); frame(select.value); });
+    if (homeBtn) homeBtn.addEventListener("click", function () { if (view) view.home(); });
     mark(select.value);
+    if (select.value) frame(select.value);
   }
 
-  /* ───────────── Map ───────────── */
-  function createMap(svg, stage, tip) {
+  /* ───────────── Animated viewBox (shared by the map and the report picker) ───────────── */
+  function createView(svg, onApply) {
     var base = svg.getAttribute("data-viewbox").split(" ").map(Number);
     var aspect = base[3] / base[2];
     var vb = base.slice();
     var anim = 0;
-
     function clamp(v) {
       var w = Math.min(base[2], Math.max(base[2] / 6, v[2]));
       var h = w * aspect;
@@ -63,13 +75,9 @@
     }
     function apply() {
       svg.setAttribute("viewBox", vb.join(" "));
-      stage.classList.toggle("is-zoomed", vb[2] < base[2] - 0.5);
+      if (onApply) onApply(vb[2] < base[2] - 0.5);
     }
-    function set(v) {
-      cancelAnimationFrame(anim);
-      vb = clamp(v);
-      apply();
-    }
+    function set(v) { cancelAnimationFrame(anim); vb = clamp(v); apply(); }
     function animateTo(target, ms) {
       target = clamp(target);
       cancelAnimationFrame(anim);
@@ -93,8 +101,7 @@
       if (animate) animateTo(target, 280); else set(target);
     }
     function home() { animateTo(base.slice()); }
-    function focus(key) {
-      var shape = key ? svg.querySelector('.hm-muni[data-k="' + key + '"] path') : null;
+    function focusEl(shape) {
       if (!shape || !shape.getBBox) { home(); return; }
       var b = shape.getBBox();
       var w = Math.max(b.width * 2.4, (b.height * 2.4) / aspect, base[2] / 4);
@@ -105,6 +112,21 @@
       var r = svg.getBoundingClientRect();
       return [vb[0] + ((clientX - r.left) / r.width) * vb[2], vb[1] + ((clientY - r.top) / r.height) * vb[3]];
     }
+    return {
+      base: base, aspect: aspect,
+      get vb() { return vb.slice(); },
+      zoomed: function () { return vb[2] < base[2] - 0.5; },
+      stop: function () { cancelAnimationFrame(anim); },
+      set: set, animateTo: animateTo, zoomBy: zoomBy, home: home, focusEl: focusEl, toSvg: toSvg,
+    };
+  }
+
+  /* ───────────── Map ───────────── */
+  function createMap(svg, stage, tip) {
+    var view = createView(svg, function (z) { stage.classList.toggle("is-zoomed", z); });
+    var base = view.base, aspect = view.aspect;
+    var set = view.set, zoomBy = view.zoomBy, home = view.home, toSvg = view.toSvg;
+    function focus(key) { view.focusEl(key ? svg.querySelector('.hm-muni[data-k="' + key + '"] path') : null); }
 
     /* Tooltip: name + count, follows the pointer */
     var labels = {};
@@ -157,15 +179,16 @@
     svg.addEventListener("pointerdown", function (e) {
       pts[e.pointerId] = [e.clientX, e.clientY];
       moved = false;
-      if (vb[2] >= base[2] - 0.5) return;
-      cancelAnimationFrame(anim);
+      if (!view.zoomed()) return;
+      view.stop();
+      var vb = view.vb;
       if (count() === 2) {
         var p = Object.keys(pts).map(function (k) { return pts[k]; });
         var mid = toSvg((p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2);
-        pinch = { d: Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]) || 1, vb: vb.slice(), mid: mid };
+        pinch = { d: Math.hypot(p[0][0] - p[1][0], p[0][1] - p[1][1]) || 1, vb: vb, mid: mid };
         drag = null;
       } else if (count() === 1) {
-        drag = { x: e.clientX, y: e.clientY, vb: vb.slice() };
+        drag = { x: e.clientX, y: e.clientY, vb: vb };
       }
     });
     function onMove(e) {
@@ -183,6 +206,7 @@
       var r = svg.getBoundingClientRect();
       if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 4) { moved = true; stage.classList.add("is-dragging"); }
       if (!moved) return;
+      var vb = view.vb;
       set([drag.vb[0] - ((e.clientX - drag.x) / r.width) * vb[2], drag.vb[1] - ((e.clientY - drag.y) / r.height) * vb[3], vb[2], vb[3]]);
     }
     function onUp(e) {
@@ -197,7 +221,7 @@
 
     return {
       svg: svg,
-      get vb() { return vb.slice(); },
+      get vb() { return view.vb; },
       set: set,
       home: home,
       focus: focus,

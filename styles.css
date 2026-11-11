@@ -139,6 +139,53 @@
 .hm-ctl:focus-visible { outline: 2px solid #f79009; outline-offset: 2px; }
 .hm-pick { cursor: pointer; }
 .hm-pick:hover { fill: var(--hm-shape-hover); }
+.hm-pick.is-selected { fill: color-mix(in srgb, #f79009 30%, var(--hm-shape)); stroke: #f79009; stroke-width: 1.6; }
+
+/* ───────────── Methodology: step tabs, classification tabs, accordions (no JS needed) ───────────── */
+@keyframes hm-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.hm-progress { height: 4px; border-radius: 9999px; background: color-mix(in srgb, var(--ink) 10%, transparent); overflow: hidden; }
+.hm-progress > span { display: block; height: 100%; width: 20%; background: #f79009; border-radius: inherit; transition: width 0.35s ease; }
+.hm-step-tab {
+  display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+  border-radius: 14px; border: 1px solid var(--line); padding: 0.75rem 0.5rem;
+  color: var(--ink-soft); cursor: pointer; transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.hm-step-tab:hover { border-color: #f79009; color: var(--ink); }
+.hm-step-num {
+  display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; flex-shrink: 0;
+  border-radius: 9999px; font-size: 13px; font-weight: 800;
+  background: color-mix(in srgb, var(--ink) 10%, transparent); color: var(--ink);
+  transition: background 0.2s, color 0.2s;
+}
+input:checked + .hm-step-tab { border-color: #f79009; background: color-mix(in srgb, #f79009 12%, transparent); color: var(--ink); }
+input:checked + .hm-step-tab .hm-step-num { background: #f79009; color: #101828; }
+input:focus-visible + .hm-step-tab,
+input:focus-visible + .hm-tab { outline: 2px solid #f79009; outline-offset: 2px; }
+.hm-step-panel, .hm-tab-panel { display: none; animation: hm-in 0.3s ease; }
+.hm-steps:has(#hm-step-1:checked) [data-step="1"],
+.hm-steps:has(#hm-step-2:checked) [data-step="2"],
+.hm-steps:has(#hm-step-3:checked) [data-step="3"],
+.hm-steps:has(#hm-step-4:checked) [data-step="4"],
+.hm-steps:has(#hm-step-5:checked) [data-step="5"] { display: block; }
+.hm-steps:has(#hm-step-2:checked) .hm-progress > span { width: 40%; }
+.hm-steps:has(#hm-step-3:checked) .hm-progress > span { width: 60%; }
+.hm-steps:has(#hm-step-4:checked) .hm-progress > span { width: 80%; }
+.hm-steps:has(#hm-step-5:checked) .hm-progress > span { width: 100%; }
+.hm-tab { display: inline-block; border-radius: 0.5rem; padding: 0.4rem 0.8rem; color: var(--ink-soft); cursor: pointer; transition: background 0.2s, color 0.2s; }
+.hm-tab:hover { color: var(--ink); }
+input:checked + .hm-tab { background: #f79009; color: #101828; }
+.hm-tabs:has(#hm-tab-cat:checked) [data-tab="cat"],
+.hm-tabs:has(#hm-tab-grp:checked) [data-tab="grp"],
+.hm-tabs:has(#hm-tab-src:checked) [data-tab="src"] { display: flex; }
+/* Browsers without :has() show every panel instead of none */
+@supports not selector(:has(*)) { .hm-step-panel { display: block; } .hm-tab-panel { display: flex; } }
+.hm-acc { transition: border-color 0.2s; }
+.hm-acc:hover, .hm-acc[open] { border-color: color-mix(in srgb, #f79009 60%, transparent); }
+.hm-acc summary::-webkit-details-marker { display: none; }
+.hm-acc-chev { transition: transform 0.2s; }
+.hm-acc[open] .hm-acc-chev { transform: rotate(45deg); }
+.hm-acc[open] > p { animation: hm-in 0.25s ease; }
+@media (prefers-reduced-motion: reduce) { .hm-step-panel, .hm-tab-panel, .hm-acc[open] > p { animation: none; } .hm-progress > span { transition: none; } }
 
 /* ───────────── Admin primitives (Badge, Notice, Tabs, tables) ───────────── */
 .tone {
