@@ -2,15 +2,15 @@ import type { ReactNode } from "react";
 
 /* ───────────── Shared class names ───────────── */
 export const inputCls =
-  "mt-1.5 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm font-normal text-ink shadow-xs placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25";
+  "mt-1.5 w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm font-normal text-ink shadow-xs transition placeholder:text-muted hover:border-accent/50 focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/20";
 export const labelCls = "block text-sm font-medium text-ink";
 export const btnPrimary =
-  "inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-[#101828] shadow-xs transition hover:bg-brand-400 disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-[#101828] shadow-[0_8px_24px_-10px_rgba(247,144,9,0.9)] transition hover:-translate-y-px hover:bg-brand-400 active:translate-y-0 disabled:opacity-50";
 export const btnSecondary =
-  "inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-paper-2 px-4 py-2 text-sm font-medium text-ink shadow-xs transition hover:border-accent hover:text-accent-ink";
+  "inline-flex items-center justify-center gap-2 rounded-xl border border-ink/15 bg-paper-2 px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent-ink";
 export const btnDanger =
-  "inline-flex items-center justify-center gap-2 rounded-lg border border-[color:var(--tone-bad)]/40 px-4 py-2 text-sm font-semibold text-[color:var(--tone-bad)] transition hover:bg-[color:var(--tone-bad)]/10";
-export const cardCls = "rounded-xl border border-line bg-paper-2";
+  "inline-flex items-center justify-center gap-2 rounded-xl border border-[color:var(--tone-bad)]/40 px-4 py-2.5 text-sm font-semibold text-[color:var(--tone-bad)] transition hover:bg-[color:var(--tone-bad)]/10";
+export const cardCls = "rounded-2xl border border-line bg-paper-2";
 export const thCls = "px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted";
 export const tdCls = "px-4 py-3 align-top";
 

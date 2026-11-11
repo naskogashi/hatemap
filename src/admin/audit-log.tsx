@@ -41,7 +41,7 @@ export function AuditDetails({ row, lang, showAction = true }: { row: Row; lang:
       {showAction ? <p className="font-semibold text-ink">{actionLabel(row.action, lang)}</p> : null}
       {showMeta ? (
         <p className="text-xs text-muted">
-          {dt(row.at)} UTC · {row.actor}
+          {dt(row.at)} · {row.actor}
         </p>
       ) : null}
       {status?.to ? (
