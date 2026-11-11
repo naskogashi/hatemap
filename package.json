@@ -1,0 +1,13 @@
+{
+  "name": "@ex-sbunker/hatemap",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HateMap: human-reviewed documentation of hate incidents and hate speech in Kosovo (Next.js + Cloudflare D1).",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "peerDependencies": {
+    "@opennextjs/cloudflare": ">=1.0.0",
+    "next": ">=16.0.0",
+    "react": ">=19.0.0"
+  }
+}
