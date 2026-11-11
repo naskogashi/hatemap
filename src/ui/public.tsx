@@ -61,8 +61,8 @@ const HM = {
       ["Policia e Kosovës", "192"],
       ["Avokati i Popullit", "ombudspersonkosovo.org"],
     ],
-    tooMany: "Keni dërguar shumë raporte në pak kohë. Ju lutem provoni sërish më vonë.",
-    error: "Raporti nuk u dërgua. Ju lutem plotësoni fushat e kërkuara dhe provoni përsëri.",
+    tooMany: "Keni dërguar shumë raporte në pak kohë. Ju lutemi provoni sërish më vonë.",
+    error: "Raporti nuk u dërgua. Ju lutemi plotësoni fushat e kërkuara dhe provoni përsëri.",
     choose: "Zgjidhni…",
     unknown: "Nuk e di",
   },
@@ -242,7 +242,7 @@ const DASH = {
     statVerified: "Verified",
     statMunicipalities: "Municipalities with cases",
     statSince: "Tracking since",
-    mapTitle: "Incidents map",
+    mapTitle: "Incident map",
     mapSub: "Overview of published records by municipality",
     allYears: "All years",
     filters: "Filters",
@@ -368,7 +368,7 @@ function KosovoMap({ lang, counts, filters }: { lang: Lang; counts: Record<strin
   const max = Math.max(1, ...Object.values(counts));
   const keys = Object.keys(muni);
   return (
-    <svg id="hm-svg" viewBox={KOSOVO.viewBox} role="img" aria-label={t.mapTitle} className="h-full w-full touch-none select-none" data-viewbox={KOSOVO.viewBox}>
+    <svg id="hm-svg" viewBox={KOSOVO.viewBox} role="img" aria-label={t.mapTitle} className="h-full w-full select-none" data-viewbox={KOSOVO.viewBox}>
       <defs>
         <filter id="hm-glow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="6" result="b" />
@@ -714,7 +714,7 @@ export async function HatemapIndex({ lang, filters }: { lang: Lang; filters: Pub
       <Container className="pb-14 xl:!max-w-[1360px]">
         <p className="rounded-2xl border border-line bg-paper-2 p-4 text-sm text-muted">{t.limits}</p>
       </Container>
-      <script data-keep src="/vendor/hatemap.js?v=7" defer />
+      <script data-keep src="/vendor/hatemap.js?v=8" defer />
     </div>
   );
 }
@@ -972,7 +972,7 @@ export function HatemapReport({ lang, status }: { lang: Lang; status?: string })
           </p>
         </aside>
       </Container>
-      <script data-keep src="/vendor/hatemap.js?v=7" defer />
+      <script data-keep src="/vendor/hatemap.js?v=8" defer />
     </div>
   );
 }

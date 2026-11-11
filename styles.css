@@ -41,6 +41,7 @@
 }
 .hm-shape.has-data { fill: var(--hm-shape-data); }
 .hm-muni:hover .hm-shape,
+.hm-muni.is-hot .hm-shape,
 .hm-muni:focus-visible .hm-shape { fill: var(--hm-shape-hover); }
 .hm-shape.is-selected { fill: color-mix(in srgb, #f79009 30%, var(--hm-shape)); stroke: #f79009; stroke-width: 1.6; }
 .hm-muni:focus-visible { outline: none; }
@@ -59,8 +60,20 @@
   stroke-width: 3px;
   pointer-events: none;
 }
-#hm-stage { background: var(--hm-stage); cursor: grab; }
+#hm-stage { background: var(--hm-stage); }
+#hm-stage.is-zoomed { cursor: grab; }
 #hm-stage.is-dragging { cursor: grabbing; }
+/* One finger scrolls the page over the map; once zoomed in, touch pans and pinches the map instead. */
+#hm-svg { touch-action: pan-y pinch-zoom; }
+#hm-stage.is-zoomed #hm-svg { touch-action: none; }
+/* In-place filter updates: dim the results while the next view loads */
+.hm-dash #hm-stage,
+.hm-dash ul,
+.hm-dash dl { transition: opacity 0.2s ease; }
+.hm-dash.is-loading #hm-stage,
+.hm-dash.is-loading ul,
+.hm-dash.is-loading dl { opacity: 0.55; }
+@media (prefers-reduced-motion: reduce) { .hm-dash #hm-stage, .hm-dash ul, .hm-dash dl { transition: none; } }
 .hm-field {
   display: flex;
   align-items: center;
@@ -123,6 +136,7 @@
   cursor: pointer;
 }
 .hm-ctl:hover { color: #fdb022; }
+.hm-ctl:focus-visible { outline: 2px solid #f79009; outline-offset: 2px; }
 .hm-pick { cursor: pointer; }
 .hm-pick:hover { fill: var(--hm-shape-hover); }
 
