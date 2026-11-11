@@ -507,7 +507,7 @@ export async function HatemapIndex({ lang, filters }: { lang: Lang; filters: Pub
     <div className="hm-dash">
       {/* ── Hero + map + filters ── */}
       <Container className="grid gap-6 py-10 lg:grid-cols-12 lg:py-14 xl:!max-w-[1360px]">
-        <div className="flex flex-col justify-center lg:col-span-4">
+        <div className="flex flex-col justify-start lg:col-span-4 lg:pt-6">
           <p className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent-ink">
             <span aria-hidden className="inline-block h-[3px] w-8 bg-brand-500" /> EX-Sbunker HateMap
           </p>
@@ -570,7 +570,7 @@ export async function HatemapIndex({ lang, filters }: { lang: Lang; filters: Pub
               ))}
             </nav>
           </div>
-          <div id="hm-stage" className="relative mt-3 min-h-[440px] w-full flex-1 overflow-hidden rounded-2xl sm:min-h-[560px]">
+          <div id="hm-stage" className="relative mt-3 h-[440px] w-full shrink-0 overflow-hidden rounded-2xl sm:h-[620px]">
             <div className="absolute inset-0 p-2">
               <KosovoMap lang={lang} counts={data.byMunicipality} filters={filters} />
             </div>
@@ -589,14 +589,19 @@ export async function HatemapIndex({ lang, filters }: { lang: Lang; filters: Pub
               </div>
             </div>
           </div>
+          {/* Always takes one line, so selecting a municipality never changes the card height (no layout jump). */}
           {filters.municipality ? (
-            <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-ink-soft">
-              {d.selected}: <strong className="text-ink">{municipalityName(filters.municipality, lang)}</strong>
-              <a href={qs(base, filters, { municipality: undefined })} className="font-semibold text-accent-ink hover:underline">
+            <p className="mt-3 flex h-6 items-center gap-2 overflow-hidden whitespace-nowrap text-sm text-ink-soft">
+              <span className="truncate">
+                {d.selected}: <strong className="text-ink">{municipalityName(filters.municipality, lang)}</strong>
+              </span>
+              <a href={qs(base, filters, { municipality: undefined })} className="shrink-0 font-semibold text-accent-ink hover:underline">
                 {d.showAll}
               </a>
             </p>
-          ) : null}
+          ) : (
+            <p aria-hidden className="mt-3 h-6" />
+          )}
           <p className="mt-2 text-[11px] text-muted">{d.attribution}</p>
         </section>
 
