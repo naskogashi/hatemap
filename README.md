@@ -76,6 +76,7 @@ HateMap is source code, not a published npm package. Copy or vendor it into your
 | `requirePerm(perm)` | returns `{ uid, email, role, name }` or redirects to your login; checks `can(role, perm)` from `taxonomy.ts` |
 | `AdminShell` | your admin layout: `{ title, eyebrow?, active?, actions?, children }` |
 | `emailLayout`, `esc`, `sendMail(env, mail)`, `recipients(env)` | your email helpers |
+| `BotCheck`, `verifyBotCheck(form, req)` | bot check for the public report and correction-request forms: a server component rendered inside the form, and its server-side check (to opt out: `() => null` and `async () => true`) |
 
 **3. Routes**: re-export the pages and handlers. Keep segment config literal in each file:
 

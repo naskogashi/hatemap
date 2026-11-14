@@ -97,6 +97,7 @@ export const ACTION_LABEL: Record<string, L> = {
   "content.confirm_group": { sq: "Konfirmoi përkthimet", en: "Confirmed translations" },
   "media.upload": { sq: "Ngarkoi media", en: "Uploaded media" },
   "media.delete": { sq: "Fshiu media", en: "Deleted media" },
+  "media.display": { sq: "Ndryshoi shfaqjen e imazhit në karta", en: "Changed how an image shows in cards" },
   "media.move": { sq: "Zhvendosi skedarët në adresa të shkurtra", en: "Moved files to short addresses" },
   "content.delete": { sq: "Fshiu përmbajtje", en: "Deleted content" },
   "backup.create": { sq: "Kopje rezervë", en: "Backup created" },

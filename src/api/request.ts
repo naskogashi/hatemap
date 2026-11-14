@@ -2,13 +2,13 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { formLang } from "@hatemap-host";
 import { audit, rateLimit } from "@hatemap/lib/records";
 import { hatemapCaseEmail, recipients, sendMail } from "@hatemap/lib/email";
-import { hatemapPath } from "@hatemap-host";
+import { hatemapPath, verifyBotCheck } from "@hatemap-host";
 
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
 
 /**
  * Public correction / appeal / removal request → hm_cases (never changes a record by itself).
- * Honeypot + rate limit (5 per hour per anonymised client). Staff are notified
+ * Honeypot + host bot check + rate limit (5 per hour per anonymised client). Staff are notified
  * by email WITHOUT the request text or the requester's contact details.
  */
 export async function POST(req: Request) {
@@ -18,6 +18,7 @@ export async function POST(req: Request) {
   const str = (k: string, max: number) => String(form.get(k) ?? "").trim().slice(0, max);
 
   if (form.get("website")) return back("ok"); // bots get a silent success
+  if (!(await verifyBotCheck(form, req))) return back("error");
   const { env, ctx } = await getCloudflareContext({ async: true });
 
   // Rate limit on a salted daily hash of the IP (the IP itself is never stored).

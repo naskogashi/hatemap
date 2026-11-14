@@ -3,14 +3,14 @@ import { formLang } from "@hatemap-host";
 import { audit, rateLimit } from "@hatemap/lib/records";
 import { CATEGORIES, isKey, isMunicipality, label, municipalityName } from "@hatemap/lib/taxonomy";
 import { hatemapReportEmail, recipients, sendMail } from "@hatemap/lib/email";
-import { hatemapPath } from "@hatemap-host";
+import { hatemapPath, verifyBotCheck } from "@hatemap-host";
 
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
 
 /**
  * Citizen / partner report (reporting layer).
  * - Plain HTML form POST, works without JavaScript.
- * - Honeypot + rate limit (5 reports per hour per anonymised client).
+ * - Honeypot + host bot check (e.g. Turnstile) + rate limit (5 reports per hour per anonymised client).
  * - Stored only in the protected hm_reports table; never published automatically.
  * - Moderators are notified by email WITHOUT the report content.
  */
@@ -21,6 +21,7 @@ export async function POST(req: Request) {
   const str = (k: string, max: number) => String(form.get(k) ?? "").trim().slice(0, max);
 
   if (form.get("website")) return back("ok"); // bots get a silent success
+  if (!(await verifyBotCheck(form, req))) return back("error");
   const { env, ctx } = await getCloudflareContext({ async: true });
 
   // Rate limit on a salted hash of the client IP (the IP itself is never stored).

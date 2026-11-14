@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { hatemapPath, routePath, type Lang } from "@hatemap-host";
-import { Container } from "@hatemap-host";
+import { BotCheck, Container } from "@hatemap-host";
 
 /**
  * Public correction / appeal / removal request (HateMap governance).
@@ -324,6 +324,8 @@ export function HatemapRequest({ lang, status, record }: { lang: Lang; status?: 
               </div>
               <p className="-mt-1 text-xs text-muted">{t.emailHint}</p>
             </div>
+
+            <BotCheck />
 
             <div className="flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
               <p className="max-w-md text-xs leading-relaxed text-muted">

@@ -1,7 +1,7 @@
 import { evidence, listPublic, localized, publicMonth, type HmRecord, type PublicFilters } from "@hatemap/lib/records";
 import { CATEGORIES, GROUPS, MUNICIPALITIES, SOURCES, VERIFICATION, label, municipalityName, type Option } from "@hatemap/lib/taxonomy";
 import { CONTACT_LABEL, HTML_LANG, hatemapPath, routePath, type Lang } from "@hatemap-host";
-import { Container, Eyebrow } from "@hatemap-host";
+import { BotCheck, Container, Eyebrow } from "@hatemap-host";
 import { HATEMAP_REQUEST_LINK } from "@hatemap/ui/request";
 import KOSOVO from "@hatemap/data/kosovo-map.json";
 
@@ -59,7 +59,7 @@ const HM = {
     helpItems: [
       ["Emergjenca", "112"],
       ["Policia e Kosovës", "192"],
-      ["Avokati i Popullit", "ombudspersonkosovo.org"],
+      ["Avokati i Popullit", "0800 15555"],
     ],
     tooMany: "Keni dërguar shumë raporte në pak kohë. Ju lutemi provoni sërish më vonë.",
     error: "Raporti nuk u dërgua. Ju lutemi plotësoni fushat e kërkuara dhe provoni përsëri.",
@@ -117,7 +117,7 @@ const HM = {
     helpItems: [
       ["Emergency", "112"],
       ["Kosovo Police", "192"],
-      ["Ombudsperson Institution", "ombudspersonkosovo.org"],
+      ["Ombudsperson Institution", "0800 15555"],
     ],
     tooMany: "You have sent too many reports in a short time. Please try again later.",
     error: "The report was not sent. Please fill in the required fields and try again.",
@@ -175,7 +175,7 @@ const HM = {
     helpItems: [
       ["Hitna pomoć", "112"],
       ["Kosovska policija", "192"],
-      ["Institucija Ombudsmana", "ombudspersonkosovo.org"],
+      ["Institucija Ombudsmana", "0800 15555"],
     ],
     tooMany: "Poslali ste previše prijava u kratkom roku. Pokušajte ponovo kasnije.",
     error: "Prijava nije poslata. Popunite obavezna polja i pokušajte ponovo.",
@@ -809,7 +809,9 @@ export function HatemapReport({ lang, status }: { lang: Lang; status?: string })
         {t.helpItems.map(([k, v]) => (
           <li key={k} className="flex items-center justify-between gap-3 rounded-xl bg-ink/5 px-3 py-2">
             <span className="text-ink-soft">{k}</span>
-            <strong className="text-ink">{v}</strong>
+            <a href={`tel:${v.replace(/\s/g, "")}`} className="font-bold text-ink hover:text-accent-ink">
+              {v}
+            </a>
           </li>
         ))}
       </ul>
@@ -943,6 +945,7 @@ export function HatemapReport({ lang, status }: { lang: Lang; status?: string })
               {t.consent}
               <input type="checkbox" name="contact_ok" value="1" className="hm-switch" />
             </label>
+            <BotCheck />
             <div>
               <button className="inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 font-semibold text-[#101828] shadow-[0_10px_30px_-10px_rgba(247,144,9,0.8)] hover:bg-brand-400">
                 <Icon name="shield" /> {t.send}
