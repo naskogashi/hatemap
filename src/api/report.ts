@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { formLang } from "@hatemap-host";
+import { formLang, publicOrigin } from "@hatemap-host";
 import { audit, rateLimit } from "@hatemap/lib/records";
 import { CATEGORIES, isKey, isMunicipality, label, municipalityName } from "@hatemap/lib/taxonomy";
 import { hatemapReportEmail, recipients, sendMail } from "@hatemap/lib/email";
@@ -17,8 +17,12 @@ const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
 export async function POST(req: Request) {
   const form = await req.formData();
   const lang = formLang(form.get("lang"));
-  const back = (status: string) => new Response(null, { status: 303, headers: { Location: `${hatemapPath(lang, "report")}?form=${status}` } });
   const str = (k: string, max: number) => String(form.get(k) ?? "").trim().slice(0, max);
+  // A failed submit goes back to the form with the chosen municipality still selected.
+  const picked = str("municipality", 40);
+  const keep = isMunicipality(picked) || picked === "unknown" ? `&municipality=${encodeURIComponent(picked)}` : "";
+  const back = (status: string) =>
+    new Response(null, { status: 303, headers: { Location: `${hatemapPath(lang, "report")}?form=${status}${status === "ok" ? "" : keep}` } });
 
   if (form.get("website")) return back("ok"); // bots get a silent success
   if (!(await verifyBotCheck(form, req))) return back("error");
@@ -58,7 +62,7 @@ export async function POST(req: Request) {
     category: label(CATEGORIES, category, "sq"),
     municipality: municipality === "unknown" ? "E panjohur" : municipalityName(municipality, "sq"),
     occurred,
-    adminUrl: `${new URL(req.url).origin}/admin/hatemap/report/${id}/`,
+    adminUrl: `${publicOrigin(req)}/admin/hatemap/report/${id}/`,
   });
   ctx.waitUntil(
     sendMail(env, { to: recipients(env), ...mail }).then((r) => {

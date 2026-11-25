@@ -1,5 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { formLang } from "@hatemap-host";
+import { formLang, publicOrigin } from "@hatemap-host";
 import { audit, rateLimit } from "@hatemap/lib/records";
 import { hatemapCaseEmail, recipients, sendMail } from "@hatemap/lib/email";
 import { hatemapPath, verifyBotCheck } from "@hatemap-host";
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
   const id = row!.id;
   ctx.waitUntil(audit("public", "case.open", "case", id, { kind, urgency, record: rec?.id ?? null, lang }));
 
-  const mail = hatemapCaseEmail({ id, kind, urgent: urgency === "urgent", adminUrl: `${new URL(req.url).origin}/admin/hatemap/cases/${id}/` });
+  const mail = hatemapCaseEmail({ id, kind, urgent: urgency === "urgent", adminUrl: `${publicOrigin(req)}/admin/hatemap/cases/${id}/` });
   ctx.waitUntil(
     sendMail(env, { to: recipients(env), ...mail }).then((r) => {
       if (!r.ok) console.error("hatemap case notification failed:", r.error);

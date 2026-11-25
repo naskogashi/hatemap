@@ -1,5 +1,5 @@
 import { evidence, listPublic, localized, publicMonth, type HmRecord, type PublicFilters } from "@hatemap/lib/records";
-import { CATEGORIES, GROUPS, MUNICIPALITIES, SOURCES, VERIFICATION, label, municipalityName, type Option } from "@hatemap/lib/taxonomy";
+import { CATEGORIES, GROUPS, MUNICIPALITIES, SOURCES, VERIFICATION, isMunicipality, label, municipalityName, type Option } from "@hatemap/lib/taxonomy";
 import { CONTACT_LABEL, HTML_LANG, hatemapPath, routePath, type Lang } from "@hatemap-host";
 import { BotCheck, Container, Eyebrow } from "@hatemap-host";
 import { HATEMAP_REQUEST_LINK } from "@hatemap/ui/request";
@@ -519,7 +519,10 @@ export async function HatemapIndex({ lang, filters }: { lang: Lang; filters: Pub
           </h1>
           <p className="mt-6 text-lg leading-relaxed text-ink-soft">{d.lead}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <a href={hatemapPath(lang, "report")} className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-3 font-semibold text-[#101828] shadow-[0_10px_30px_-10px_rgba(247,144,9,0.8)] hover:bg-brand-400">
+            <a
+              href={filters.municipality ? `${hatemapPath(lang, "report")}?municipality=${encodeURIComponent(filters.municipality)}` : hatemapPath(lang, "report")}
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-3 font-semibold text-[#101828] shadow-[0_10px_30px_-10px_rgba(247,144,9,0.8)] hover:bg-brand-400"
+            >
               <Icon name="shield" /> {d.report}
             </a>
             <a href={hatemapPath(lang, "methodology")} className="inline-flex items-center gap-2 rounded-xl border border-line px-5 py-3 font-semibold text-ink hover:border-brand-400">
@@ -798,8 +801,13 @@ const STEP = {
   sr: ["Šta se dogodilo", "Gde i kada", "Izvor i kontakt (opciono)", "Kliknite opštinu na mapi ili je izaberite ispod"],
 } as const;
 
-export function HatemapReport({ lang, status }: { lang: Lang; status?: string }) {
+/**
+ * Report form. `municipality` (from ?municipality=, e.g. carried over from the map selection
+ * or kept after a failed submit) preselects the select; hatemap.js then frames it on the picker map.
+ */
+export function HatemapReport({ lang, status, municipality }: { lang: Lang; status?: string; municipality?: string }) {
   const t = HM[lang];
+  const preset = municipality && (isMunicipality(municipality) || municipality === "unknown") ? municipality : "";
   const steps = STEP[lang];
   const field = "hm-field mt-1.5";
   const helpBox = (
@@ -899,7 +907,7 @@ export function HatemapReport({ lang, status }: { lang: Lang; status?: string })
                 {t.municipality} *
                 <span className={field}>
                   <Icon name="pin" />
-                  <select name="municipality" required defaultValue="" id="hm-pick-select">
+                  <select name="municipality" required defaultValue={preset} id="hm-pick-select">
                     <option value="" disabled>
                       {t.choose}
                     </option>
